@@ -118,6 +118,7 @@ jobs:
           app-name: ${{ env.PRODUCT_NAME }}
           bundle-id: ${{ env.BUNDLE_ID }}
           product-name: ${{ env.PRODUCT_NAME }}
+          icon-path: ./Sprites/wicon.png
           output-folder: ./dist
 
       - name: Upload Linux artifact
