@@ -44,7 +44,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.mousereleased(x, y, button)
-    if button == "l" then
+    if button == 1 then
         game:mousereleased(x, y)
     end
 end
