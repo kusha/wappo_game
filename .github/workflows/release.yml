@@ -24,17 +24,7 @@ jobs:
       - name: Build .love package
         uses: love-actions/love-actions-core@v1
         with:
-          build-list: |
-            main.lua
-            conf.lua
-            animation.lua
-            game/
-            menu/
-            editor/
-            maps/
-            libs/
-            Sprites/
-            Audio/
+          build-list: main.lua conf.lua animation.lua game/ menu/ editor/ maps/ libs/ Sprites/ Audio/
           package-path: ./${{ env.PRODUCT_NAME }}.love
 
       - name: Upload .love artifact
