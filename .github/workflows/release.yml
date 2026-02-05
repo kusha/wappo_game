@@ -36,9 +36,6 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: build-love
-    strategy:
-      matrix:
-        arch: [x64, x86]
     steps:
       - uses: actions/checkout@v4
 
@@ -53,38 +50,48 @@ jobs:
           love-ref: "11.5"
           love-package: ./${{ env.PRODUCT_NAME }}.love
           product-name: ${{ env.PRODUCT_NAME }}
-          version-string: ${{ needs.build-love.outputs.version }}
           output-folder: ./dist
-          arch: ${{ matrix.arch }}
 
-      - name: Upload Windows artifact
+      - name: Upload Windows x64 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.arch }}
-          path: ./dist/${{ env.PRODUCT_NAME }}_win_${{ matrix.arch }}.zip
+          name: windows-x64
+          path: ./dist/${{ env.PRODUCT_NAME }}_x64.zip
+
+      - name: Upload Windows x86 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86
+          path: ./dist/${{ env.PRODUCT_NAME }}_x86.zip
 
   build-macos:
     runs-on: macos-latest
     needs: build-love
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download .love package
         uses: actions/download-artifact@v4
         with:
           name: love-package
 
-      - name: Build macOS app
-        uses: love-actions/love-actions-macos-portable@v1
-        with:
-          love-ref: "11.5"
-          love-package: ./${{ env.PRODUCT_NAME }}.love
-          product-name: ${{ env.PRODUCT_NAME }}
-          bundle-id: ${{ env.BUNDLE_ID }}
-          version-string: ${{ needs.build-love.outputs.version }}
-          output-folder: ./dist
-          account-username: ""
-          account-password: ""
+      - name: Create macOS package
+        run: |
+          mkdir -p dist
+          # Create a README for macOS users
+          cat > README_macOS.txt << 'EOF'
+          Wappo for macOS
+          ================
+          
+          To play Wappo on macOS:
+          
+          1. Download and install LÖVE from https://love2d.org/
+          2. Double-click the Wappo.love file, or
+          3. Run from terminal: open -a love Wappo.love
+          
+          Enjoy the game!
+          EOF
+          
+          # Create zip with .love file and README
+          zip -j ./dist/${{ env.PRODUCT_NAME }}_macos.zip ./${{ env.PRODUCT_NAME }}.love README_macOS.txt
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -108,8 +115,9 @@ jobs:
         with:
           love-ref: "11.5"
           love-package: ./${{ env.PRODUCT_NAME }}.love
+          app-name: ${{ env.PRODUCT_NAME }}
+          bundle-id: ${{ env.BUNDLE_ID }}
           product-name: ${{ env.PRODUCT_NAME }}
-          version-string: ${{ needs.build-love.outputs.version }}
           output-folder: ./dist
 
       - name: Upload Linux artifact
@@ -148,8 +156,8 @@ jobs:
             ## ${{ env.PRODUCT_NAME }} v${{ needs.build-love.outputs.version }}
             
             ### Downloads
-            - **Windows (64-bit)**: `${{ env.PRODUCT_NAME }}_win_x64.zip`
-            - **Windows (32-bit)**: `${{ env.PRODUCT_NAME }}_win_x86.zip`
-            - **macOS**: `${{ env.PRODUCT_NAME }}_macos.zip`
+            - **Windows (64-bit)**: `${{ env.PRODUCT_NAME }}_x64.zip`
+            - **Windows (32-bit)**: `${{ env.PRODUCT_NAME }}_x86.zip`
+            - **macOS**: `${{ env.PRODUCT_NAME }}_macos.zip` (requires [LÖVE 11.5](https://love2d.org/))
             - **Linux**: `${{ env.PRODUCT_NAME }}.AppImage`
             - **Love package**: `${{ env.PRODUCT_NAME }}.love` (requires LÖVE 11.5)
